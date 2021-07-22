@@ -25,7 +25,20 @@ async function rptcgmayor (req, res, conexion) {
         </div>
     `
    	//let sqlLimpio = await consultaLimpia('rptcgmayor.sql')
-    let sqlLimpio = 
+    let sqlLimpio = `
+    SELECT Polizas.CLAVE, Polizas.SIT, Polizas.FECH, Polizas.IMPORTE, CuentasTmp.SALDO, CuentasTmp.CARGOS, CuentasTmp.ABONOS, Polizas.TIPOPOL, Polizas.NUMPOL, Polizas.NCONS, Polizas.CONCEPTO, Polizas.AFILIA, Polizas.DOCTO, CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA, Cuentas.NOMBRE
+    FROM   "IPEBD"."dbo"."CuentasTmp" CuentasTmp  Left JOIN  "IPEBD"."Dbo"."Polizas" Polizas  ON
+    (CuentasTmp."SUBCTA" = Polizas."Subctap"  and
+      CuentasTmp."SSUBCTA" = Polizas."SSubctap"  and
+       CuentasTmp."CUENTA" = Polizas."CUENTAP" and Polizas."Fech" >= '${req.params.fechainicio}' and Polizas."Fech" <= '${req.params.fechafin}') 
+   
+     Inner Join  "IPEBD"."dbo"."Cuentas" Cuentas  On
+    (CuentasTmp."SUBCTA" = Cuentas."Subcta"  and
+      CuentasTmp."SSUBCTA" = Cuentas."SSubcta"  and
+       CuentasTmp."CUENTA" = Cuentas."CUENTA" ) 
+    WHERE  Cuentas."Año" = ${req.params.anio}  and (CuentasTmp."SALDO" <> 0 or CuentasTmp."CARGOS" <> 0 or CuentasTmp."ABONOS" <> 0)
+    ORDER BY CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA   
+    `
     let salida = await ejecucionSQL(sqlLimpio, conexion)
     jsreport.render({
         template: {
