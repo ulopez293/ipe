@@ -1,0 +1,4 @@
+
+ SELECT `Prestamos`.`Tipo`, `PCPBancos`.`Descripción`, `Prestamos`.`Bonificacion`, `Prestamos`.`OrdenDscto`, `Prestamos`.`Líquido`, `Prestamos`.`FondoGarantia`, `Prestamos`.`PrimaRenov`, `PCPBancos`.`CuentaCon`, `PCPBancos`.`SubCuentaCon`, `PCPBancos`.`SubSubCuentaCon`, `Prestamos`.`FechaGenera`, `Prestamos`.`Cheque`, `InformacionCapitalInteres`.`Capital`, `InformacionCapitalInteres`.`Interes`, `Prestamos`.`ImportePtmo`, `Prestamos`.`InteresPtmo`, `Prestamos`.`InteresDiario`
+ FROM   (`IPEBD`.`dbo`.`Prestamos` `Prestamos` INNER JOIN `IPEBD`.`dbo`.`PCPBancos` `PCPBancos` ON `Prestamos`.`Banco`=`PCPBancos`.`Banco`) INNER JOIN `IPEBD`.`dbo`.`InformacionCapitalInteres` `InformacionCapitalInteres` ON (`Prestamos`.`ActPen`=`InformacionCapitalInteres`.`Actpen`) AND (`Prestamos`.`Número`=`InformacionCapitalInteres`.`Número`)
+

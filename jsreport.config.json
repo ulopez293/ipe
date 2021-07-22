@@ -1,0 +1,12 @@
+{
+  "allowLocalFilesAccess": true,
+  "reportTimeout": 60000,
+  "extensions": {
+    "assets": {
+      "publicAccessEnabled": true
+    }
+  },
+  "sample-template": {
+      "createSamples": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+    "key" : "core-migrated-folders",
+    "value" : "true",
+    "creationDate" : { "$$date" : 1622746238262 },
+    "modificationDate" : { "$$date" : 1622746238262 },
+    "shortid" : "0AmbBLf", 
+    "_id" : "Y4mTL8ndLcnSPUEt", 
+    "$entitySet" : "settings" 
+}
