@@ -39,81 +39,85 @@ async function rptcgmayor (req, res, conexion) {
     WHERE  Cuentas."Año" = ${req.params.anio}  and (CuentasTmp."SALDO" <> 0 or CuentasTmp."CARGOS" <> 0 or CuentasTmp."ABONOS" <> 0)
     ORDER BY CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA   
     `
-    let salida = await ejecucionSQL(sqlLimpio, conexion)
+    ejecucionSQL(sqlLimpio, conexion).then((salida)=>{
 
-    let contadorRegistros = 0
-    let cuerpo = salida.recordset.map((element) => {
-        if(contadorRegistros < 50) {
-            contadorRegistros++
-            return `
-            <tr>
-                <th>${element.NUMPOL ?? ''}</th>
-                <td>${element.CUENTA ?? ''}</td>
-                <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
-                <td>${element.NOMBRE ?? ''}</td>
-                <td>${element.AFILIA ?? ''}</th>
-                <td>${element.SALDO ?? ''}</th>
-                <td>${element.CARGOS ?? ''}</th>
-                <td>${element.ABONOS ?? ''}</th>
-            </tr>
-            `
-        }
-    }).toString().replaceAll(',', '')
-    
-    jsreport.render({
-        template: {
-          content: `
-          <html>
-            <head>
-                <style>
-                    {#asset ./bootstrap/bootstrap.min.css @encoding=utf8}
-                </style>
-                <script src="{#asset ./bootstrap/bootstrap.min.js @encoding=link}"></script>
-            </head>
-            <body>
-            <center>
-                    ${cabeceraTemplate}
-                    <p style="text-align:right;">
-                        Fecha: ${moment().format('L')}
-                        Hora: ${moment().format('LT')}
-                     </p>
-                    <table class="table mt-5">
-                        <thead>
-                            <tr>
-                                <th scope="col">No. Poliza</th>
-                                <th scope="col">No. Renta</th>
-                                <th scope="col">Fecha</th>
-                                <th scope="col">Concepto</th>
-                                <th scope="col">Afiliado</th>
-                                <th scope="col">Docto.</th>
-                                <th scope="col">Cargos</th>
-                                <th scope="col">Abonos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        ${cuerpo}
-                        </tbody>
-                    </table>
-                </center>
-            </body>
-          </html>
-          `,
-          engine: 'handlebars',
-          recipe: 'chrome-pdf',
-          chrome: {
-            displayHeaderFooter: true,
-            headerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\"></div>`,
-            footerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\"></div>`,
-            landscape: true,
-            format: 'A4',
-            marginTop: '25px',
-            marginBottom: '25px',
-            marginLeft: '50px',
-            marginRight: '50px'
-          }
-        },
-        data: { dato: '' }
-     }).then((out)=>{out.stream.pipe(res)}).catch((e)=>{res.end(e.message)})
+        let contadorRegistros = 0
+        let cuerpo = salida.recordset.map((element) => {
+            if(contadorRegistros < 50) {
+                contadorRegistros++
+                return `
+                <tr>
+                    <th>${element.NUMPOL ?? ''}</th>
+                    <td>${element.CUENTA ?? ''}</td>
+                    <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
+                    <td>${element.NOMBRE ?? ''}</td>
+                    <td>${element.AFILIA ?? ''}</th>
+                    <td>${element.SALDO ?? ''}</th>
+                    <td>${element.CARGOS ?? ''}</th>
+                    <td>${element.ABONOS ?? ''}</th>
+                </tr>
+                `
+            }
+        }).toString().replaceAll(',', '')
+        
+        jsreport.render({
+            template: {
+              content: `
+              <html>
+                <head>
+                    <style>
+                        {#asset ./bootstrap/bootstrap.min.css @encoding=utf8}
+                    </style>
+                    <script src="{#asset ./bootstrap/bootstrap.min.js @encoding=link}"></script>
+                </head>
+                <body>
+                <center>
+                        ${cabeceraTemplate}
+                        <p style="text-align:right;">
+                            Fecha: ${moment().format('L')}
+                            Hora: ${moment().format('LT')}
+                         </p>
+                        <table class="table mt-5">
+                            <thead>
+                                <tr>
+                                    <th scope="col">No. Poliza</th>
+                                    <th scope="col">No. Renta</th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Concepto</th>
+                                    <th scope="col">Afiliado</th>
+                                    <th scope="col">Docto.</th>
+                                    <th scope="col">Cargos</th>
+                                    <th scope="col">Abonos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            ${cuerpo}
+                            </tbody>
+                        </table>
+                    </center>
+                </body>
+              </html>
+              `,
+              engine: 'handlebars',
+              recipe: 'chrome-pdf',
+              chrome: {
+                displayHeaderFooter: true,
+                headerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\"></div>`,
+                footerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\"></div>`,
+                landscape: true,
+                format: 'A4',
+                marginTop: '25px',
+                marginBottom: '25px',
+                marginLeft: '50px',
+                marginRight: '50px'
+              }
+            },
+            data: { dato: '' }
+         }).then((out)=>{out.stream.pipe(res)}).catch((e)=>{res.end(e.message)})
+
+    }, ()=>{
+        console.log("error promesa")
+    })
 }
 
 
