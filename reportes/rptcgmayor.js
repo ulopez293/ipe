@@ -3,7 +3,6 @@ let consultaLimpia = require('../server/consultaLimpia.js').consultaLimpia
 let ejecucionSQL = require('../server/ejecucionSQL.js').ejecucionSQL
 const moment = require('moment')
 
-
 async function rptcgmayor (req, res, conexion) {
     let cabeceraTemplate = `
         <div class="container">
@@ -40,6 +39,21 @@ async function rptcgmayor (req, res, conexion) {
     ORDER BY CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA   
     `
     let salida = await ejecucionSQL(sqlLimpio, conexion)
+    let cuerpo = salida.recordset.map((element) => {
+        return `
+        <tr>
+            <th>${element.NUMPOL ?? ''}</th>
+            <td>${element.CUENTA ?? ''}</td>
+            <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
+            <td>${element.NOMBRE ?? ''}</td>
+            <td>${element.AFILIA ?? ''}</th>
+            <td>${element.SALDO ?? ''}</th>
+            <td>${element.CARGOS ?? ''}</th>
+            <td>${element.ABONOS ?? ''}</th>
+        </tr>
+        `
+    }).toString().replaceAll(',', '')
+    
     jsreport.render({
         template: {
           content: `
@@ -71,20 +85,7 @@ async function rptcgmayor (req, res, conexion) {
                             </tr>
                         </thead>
                         <tbody>
-                        ${salida.recordset.map((element) => {
-                            return `
-                            <tr>
-                                <th>${element.NUMPOL ?? ''}</th>
-                                <td>${element.CUENTA ?? ''}</td>
-                                <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
-                                <td>${element.NOMBRE ?? ''}</td>
-                                <td>${element.AFILIA ?? ''}</th>
-                                <td>${element.SALDO ?? ''}</th>
-                                <td>${element.CARGOS ?? ''}</th>
-                                <td>${element.ABONOS ?? ''}</th>
-                            </tr>
-                            `
-                        }).toString().replaceAll(',', '')}
+                        ${cuerpo}
                         </tbody>
                     </table>
                 </center>
@@ -110,7 +111,11 @@ async function rptcgmayor (req, res, conexion) {
           }
         },
         data: { dato: '' }
-     }).then((out)=>{out.stream.pipe(res)}).catch((e)=>{res.end(e.message)})
+     }).then((out)=>{
+         out.stream.pipe(res)
+     }).catch((e)=>{
+         res.end(e.message)
+     })
 }
 
 
