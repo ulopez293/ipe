@@ -10,7 +10,9 @@ const rptcgmayor = require('./reportes/rptcgmayor.js')
 const rptcglibromayor = require('./reportes/rptcglibromayor.js')
 const rptcgctascolectivas = require('./reportes/rptcgctascolectivas.js')
 
-app.get('/rptcgmayor', (req,res) => { rptcgmayor(req,res,conexion) })
+app.get('/rptcgmayor/:fechainicio/:fechafin/:anio/:mes', (req,res) => { 
+    rptcgmayor(req,res,conexion) 
+})
 app.get('/rptcglibromayor', (req,res) => { rptcglibromayor(req,res,conexion) })
 app.get('/rptcgctascolectivas/:tipo/:anio', (req,res) => { rptcgctascolectivas(req,res,conexion) })
 

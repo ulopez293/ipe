@@ -1,6 +1,6 @@
 {
   "allowLocalFilesAccess": true,
-  "reportTimeout": 60000,
+  "reportTimeout": 1200000,
   "extensions": {
     "assets": {
       "publicAccessEnabled": true
@@ -8,5 +8,8 @@
   },
   "sample-template": {
       "createSamples": true
+  },
+  "express": {
+    "inputRequestLimit": "1024mb"
   }
 }
