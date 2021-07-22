@@ -40,13 +40,10 @@ async function rptcgmayor (req, res, conexion) {
     ORDER BY CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA   
     `
     let salida = await ejecucionSQL(sqlLimpio, conexion)
-    
-    res.send(salida)
-    return
-    
+
     let contadorRegistros = 0
     let cuerpo = salida.recordset.map((element) => {
-        if(contadorRegistros < 100) {
+        if(contadorRegistros < 50) {
             contadorRegistros++
             return `
             <tr>
