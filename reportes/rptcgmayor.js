@@ -1,5 +1,5 @@
 const jsreport = require('jsreport')
-let consultaLimpia = require('../server/consultaLimpia.js').consultaLimpia
+//let consultaLimpia = require('../server/consultaLimpia.js').consultaLimpia
 let ejecucionSQL = require('../server/ejecucionSQL.js').ejecucionSQL
 const moment = require('moment')
 
@@ -40,6 +40,9 @@ async function rptcgmayor (req, res, conexion) {
     ORDER BY CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA   
     `
     let salida = await ejecucionSQL(sqlLimpio, conexion)
+    
+    res.send(salida)
+    return
     
     let contadorRegistros = 0
     let cuerpo = salida.recordset.map((element) => {
