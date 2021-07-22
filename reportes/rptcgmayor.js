@@ -1,5 +1,5 @@
 const jsreport = require('jsreport')
-//let consultaLimpia = require('../server/consultaLimpia.js').consultaLimpia
+let consultaLimpia = require('../server/consultaLimpia.js').consultaLimpia
 let ejecucionSQL = require('../server/ejecucionSQL.js').ejecucionSQL
 const moment = require('moment')
 
@@ -25,101 +25,79 @@ async function rptcgmayor (req, res, conexion) {
         </div>
     `
    	//let sqlLimpio = await consultaLimpia('rptcgmayor.sql')
-    let sqlLimpio = `
-    SELECT Polizas.CLAVE, Polizas.SIT, Polizas.FECH, Polizas.IMPORTE, CuentasTmp.SALDO, CuentasTmp.CARGOS, CuentasTmp.ABONOS, Polizas.TIPOPOL, Polizas.NUMPOL, Polizas.NCONS, Polizas.CONCEPTO, Polizas.AFILIA, Polizas.DOCTO, CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA, Cuentas.NOMBRE
-    FROM   "IPEBD"."dbo"."CuentasTmp" CuentasTmp  Left JOIN  "IPEBD"."Dbo"."Polizas" Polizas  ON
-    (CuentasTmp."SUBCTA" = Polizas."Subctap"  and
-      CuentasTmp."SSUBCTA" = Polizas."SSubctap"  and
-       CuentasTmp."CUENTA" = Polizas."CUENTAP" and Polizas."Fech" >= '${req.params.fechainicio}' and Polizas."Fech" <= '${req.params.fechafin}') 
-   
-     Inner Join  "IPEBD"."dbo"."Cuentas" Cuentas  On
-    (CuentasTmp."SUBCTA" = Cuentas."Subcta"  and
-      CuentasTmp."SSUBCTA" = Cuentas."SSubcta"  and
-       CuentasTmp."CUENTA" = Cuentas."CUENTA" ) 
-    WHERE  Cuentas."Año" = ${req.params.anio}  and (CuentasTmp."SALDO" <> 0 or CuentasTmp."CARGOS" <> 0 or CuentasTmp."ABONOS" <> 0)
-    ORDER BY CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA   
-    `
-    try {
-        ejecucionSQL(sqlLimpio, conexion).then((salida)=>{
-            let contador = 0
-            let cuerpo = salida.recordset.map((element) => {
-                if (contador < 50) {
-                    return `
-                    <tr>
-                        <th>${element.NUMPOL ?? ''}</th>
-                        <td>${element.CUENTA ?? ''}</td>
-                        <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
-                        <td>${element.NOMBRE ?? ''}</td>
-                        <td>${element.AFILIA ?? ''}</th>
-                        <td>${element.SALDO ?? ''}</th>
-                        <td>${element.CARGOS ?? ''}</th>
-                        <td>${element.ABONOS ?? ''}</th>
-                    </tr>
-                    `
-                }
-            }).toString().replaceAll(',', '')
+    let sqlLimpio = 
+    let salida = await ejecucionSQL(sqlLimpio, conexion)
+    jsreport.render({
+        template: {
+          content: `
+          <html>
+            <head>
+                <style>
+                    {#asset ./bootstrap/bootstrap.min.css @encoding=utf8}
+                </style>
+                <script src="{#asset ./bootstrap/bootstrap.min.js @encoding=link}"></script>
+            </head>
+            <body>
+            <center>
+                    ${cabeceraTemplate}
+                    <p style="text-align:right;">
+                        Fecha: ${moment().format('L')}
+                        Hora: ${moment().format('LT')}
+                     </p>
+                    <table class="table mt-5">
+                        <thead>
+                            <tr>
+                                <th scope="col">No. Poliza</th>
+                                <th scope="col">No. Renta</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Concepto</th>
+                                <th scope="col">Afiliado</th>
+                                <th scope="col">Docto.</th>
+                                <th scope="col">Cargos</th>
+                                <th scope="col">Abonos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${salida.recordset.map((element) => {
+                            return `
+                            <tr>
+                                <th>${element.NUMPOL ?? ''}</th>
+                                <td>${element.CUENTA ?? ''}</td>
+                                <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
+                                <td>${element.NOMBRE ?? ''}</td>
+                                <td>${element.AFILIA ?? ''}</th>
+                                <td>${element.SALDO ?? ''}</th>
+                                <td>${element.CARGOS ?? ''}</th>
+                                <td>${element.ABONOS ?? ''}</th>
+                            </tr>
+                            `
+                        }).toString().replaceAll(',', '')}
+                        </tbody>
+                    </table>
+                </center>
+            </body>
+          </html>
+          `,
+          engine: 'handlebars',
+          recipe: 'chrome-pdf',
+          chrome: {
+            displayHeaderFooter: true,
+            headerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\">
             
-            res.send(cuerpo)
-            // jsreport.render({
-            //     template: {
-            //       content: `
-            //       <html>
-            //         <head>
-            //             <style>
-            //                 {#asset ./bootstrap/bootstrap.min.css @encoding=utf8}
-            //             </style>
-            //             <script src="{#asset ./bootstrap/bootstrap.min.js @encoding=link}"></script>
-            //         </head>
-            //         <body>
-            //         <center>
-            //                 ${cabeceraTemplate}
-            //                 <p style="text-align:right;">
-            //                     Fecha: ${moment().format('L')}
-            //                     Hora: ${moment().format('LT')}
-            //                  </p>
-            //                 <table class="table mt-5">
-            //                     <thead>
-            //                         <tr>
-            //                             <th scope="col">No. Poliza</th>
-            //                             <th scope="col">No. Renta</th>
-            //                             <th scope="col">Fecha</th>
-            //                             <th scope="col">Concepto</th>
-            //                             <th scope="col">Afiliado</th>
-            //                             <th scope="col">Docto.</th>
-            //                             <th scope="col">Cargos</th>
-            //                             <th scope="col">Abonos</th>
-            //                         </tr>
-            //                     </thead>
-            //                     <tbody>
-            //                     ${cuerpo}
-            //                     </tbody>
-            //                 </table>
-            //             </center>
-            //         </body>
-            //       </html>
-            //       `,
-            //       engine: 'handlebars',
-            //       recipe: 'chrome-pdf',
-            //       chrome: {
-            //         displayHeaderFooter: true,
-            //         headerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\"></div>`,
-            //         footerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\"></div>`,
-            //         landscape: true,
-            //         format: 'A4',
-            //         marginTop: '25px',
-            //         marginBottom: '25px',
-            //         marginLeft: '50px',
-            //         marginRight: '50px'
-            //       }
-            //     }
-            //  }).then((out)=>{out.stream.pipe(res)}).catch((e)=>{res.end(e.message)})
-    
-        }, ()=>{
-            console.log("error promesa")
-        })
-      } catch (error) {
-        console.log("En el metodo")
-      }
+            </div>`,
+            footerTemplate: `<div style=\"text-align:center; font-size: 10px; width:100%\">
+            
+            </div>`,
+            landscape: true,
+            format: 'A4',
+            marginTop: '25px',
+            marginBottom: '25px',
+            marginLeft: '50px',
+            marginRight: '50px'
+          }
+        },
+        data: { dato: '' }
+     }).then((out)=>{out.stream.pipe(res)}).catch((e)=>{res.end(e.message)})
 }
 
 
