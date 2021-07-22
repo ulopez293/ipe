@@ -39,22 +39,25 @@ async function rptcgmayor (req, res, conexion) {
     ORDER BY CuentasTmp.CUENTA, CuentasTmp.SUBCTA, CuentasTmp.SSUBCTA   
     `
     let salida = await ejecucionSQL(sqlLimpio, conexion)
-    res.send(salida)
-    return
     
+    const MAXIMO_REGISTROS = 50
+    let contadorRegistros = 0
     let cuerpo = salida.recordset.map((element) => {
-        return `
-        <tr>
-            <th>${element.NUMPOL ?? ''}</th>
-            <td>${element.CUENTA ?? ''}</td>
-            <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
-            <td>${element.NOMBRE ?? ''}</td>
-            <td>${element.AFILIA ?? ''}</th>
-            <td>${element.SALDO ?? ''}</th>
-            <td>${element.CARGOS ?? ''}</th>
-            <td>${element.ABONOS ?? ''}</th>
-        </tr>
-        `
+        contadorRegistros++
+        if(contadorRegistros <= MAXIMO_REGISTROS) {
+            return `
+            <tr>
+                <th>${element.NUMPOL ?? ''}</th>
+                <td>${element.CUENTA ?? ''}</td>
+                <td>${moment(new Date(element.FECH)).format('L') ?? ''}</td>
+                <td>${element.NOMBRE ?? ''}</td>
+                <td>${element.AFILIA ?? ''}</th>
+                <td>${element.SALDO ?? ''}</th>
+                <td>${element.CARGOS ?? ''}</th>
+                <td>${element.ABONOS ?? ''}</th>
+            </tr>
+            `
+        }
     }).toString().replaceAll(',', '')
     
     jsreport.render({
